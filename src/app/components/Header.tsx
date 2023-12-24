@@ -7,15 +7,29 @@ import { HiHome } from "react-icons/hi";
 import { BiSearch } from "react-icons/bi";
 import Button from "./Button";
 import { FaUserAlt } from "react-icons/fa";
+import useAuthModal from "../hooks/useAuthModal";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useUser } from "../hooks/useUser";
+import { toast } from "react-hot-toast";
 interface HeaderProps {
   children: React.ReactNode;
   className?: string;
 }
 const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const router = useRouter();
-  console.log("router", router);
-  const handleLogOut = () => {
+  const authModal = useAuthModal();
+  const supabseClient = useSupabaseClient();
+  const { user } = useUser();
+  const handleLogout = async () => {
     //write letter
+    const { error } = await supabseClient.auth.signOut();
+    router.refresh();
+    if (error) {
+      console.log(error);
+      toast.error(error.message);
+    } else {
+      toast.success("logged out!");
+    }
   };
   return (
     <div
@@ -96,7 +110,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             <BiSearch className="text-black" size={20} />
           </button>
         </div>
-        {/* <div className="flex justify-between items-center gap-x-4">
+        <div className="flex justify-between items-center gap-x-4">
           {user ? (
             <div className="flex gap-x-4 items-center">
               <Button onClick={handleLogout} className="bg-white px-6 py-2">
@@ -133,7 +147,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
               </div>
             </>
           )}
-        </div> */}
+        </div>
       </div>
       {children}
     </div>
